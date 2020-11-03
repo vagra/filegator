@@ -1,2 +1,9 @@
 *
 !.gitignore
+!*.md
+!*.htm
+!*.html
+!/css/
+!/css/print-*.css
+!/img/
+!/img/*

@@ -78,6 +78,9 @@ const funcs = {
     can(permissions) {
       return this.$store.getters.hasPermissions(permissions)
     },
+    need(action) {
+      return this.$store.state.action == action
+    },
     formatBytes(bytes, decimals = 2) {
       if (bytes === 0) return '0 Bytes'
 
@@ -138,6 +141,21 @@ const funcs = {
     getDownloadLink(path) {
       return Vue.config.baseURL+'/download&path='+encodeURIComponent(Base64.encode(path))
     },
+    getDocsifyLink(path) {
+      const repo = this.$store.state.config.repo_url
+      const url = this.$store.state.user.homedir + this.basename(path)
+      return repo + '#' + encodeURI(url).replace(/\/{2,}/g, '/')
+    },
+    getRootLink(path) {
+      const repo = this.$store.state.config.repo_url
+      const url = path.includes('.') ? this.basename(path) : path
+      return repo + '#' + encodeURI(url).replace(/\/{2,}/g, '/')
+    },
+    getRepoLink(path) {
+      const repo = this.$store.state.config.repo_url
+      const url = this.$store.state.user.homedir + path
+      return repo + encodeURI(url).replace(/\/{2,}/g, '/').replace(/^\//, '')
+    },
     hasPreview(name) {
       return this.isText(name) || this.isImage(name)
     },
@@ -153,6 +171,9 @@ const funcs = {
     capitalize(string) {
       return string.charAt(0).toUpperCase() + string.slice(1)
     },
+    basename(path) {
+      return path.substr(0, path.lastIndexOf('.'))
+    }
   }
 }
 

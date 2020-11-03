@@ -2,8 +2,11 @@
 /vendor
 /dist/css
 /dist/js
+/dist/fonts/*
+/dist/img/*.svg
 /dist/main.html
 
+/composer.lock
 /configuration.php
 
 /tests/backend/coverage
@@ -15,6 +18,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+php_errors.log*
 
 # Cache files
 .*.cache

@@ -7,13 +7,21 @@
     </header>
     <section class="modal-card-body">
       <form @submit="save">
-        <b-field :label="lang('Old password')" :type="formErrors.oldpassword ? 'is-danger' : ''" :message="formErrors.oldpassword">
-          <b-input v-model="oldpassword" password-reveal required @keydown.native="formErrors.oldpassword = ''" />
+        <b-field :label="lang('New name')">
+          <b-input v-model="newname" :placeholder="this.$store.state.user.name" minlength="2" maxlength="16" @keydown.native="formErrors.newname = ''" />
         </b-field>
 
-        <b-field :label="lang('New password')" :type="formErrors.newpassword ? 'is-danger' : ''" :message="formErrors.newpassword">
-          <b-input v-model="newpassword" password-reveal required @keydown.native="formErrors.newpassword = ''" />
+        <b-field :label="lang('Old password')">
+          <b-input v-model="oldpassword" type="password" password-reveal required @keydown.native="formErrors.oldpassword = ''" />
         </b-field>
+
+        <b-field :label="lang('New password')">
+          <b-input v-model="newpassword" type="password" :placeholder="lang('Leave blank for no change')" minlength="6" maxlength="16" password-reveal @keydown.native="formErrors.newpassword = ''" />
+        </b-field>
+
+        <div v-if="formErrors.oldpassword">
+          <code>{{ formErrors.oldpassword }}</code>
+        </div>
       </form>
     </section>
     <footer class="modal-card-foot">
@@ -35,6 +43,7 @@ export default {
   name: 'Profile',
   data() {
     return {
+      newname: '',
       oldpassword: '',
       newpassword: '',
       formErrors: {},
@@ -43,10 +52,12 @@ export default {
   methods: {
     save() {
       api.changePassword({
+        newname: this.newname,
         oldpassword: this.oldpassword,
         newpassword: this.newpassword,
       })
-        .then(() => {
+        .then(user => {
+          this.$store.commit('setUser', user)
           this.$toast.open({
             message: this.lang('Updated'),
             type: 'is-success',

@@ -40,6 +40,9 @@ if (! defined('APP_PUBLIC_PATH')) {
 
 define('APP_PUBLIC_DIR', __DIR__);
 define('APP_VERSION', '7.4.6');
+if (! defined('APP_REPO_DIR')) {
+    define('APP_REPO_DIR', realpath(__DIR__.'/../repository/'));
+}
 
 use Filegator\App;
 use Filegator\Config\Config;

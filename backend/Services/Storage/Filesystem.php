@@ -68,6 +68,17 @@ class Filesystem implements Service
         return $this->storage->getSize($path) === false;
     }
 
+    public function rootCopyFile(string $source, string $destination)
+    {
+        $destination = $this->joinPaths($this->applyPathPrefix($destination), $this->getBaseName($source));
+
+        while ($this->storage->has($destination)) {
+            $destination = $this->upcountName($destination);
+        }
+
+        return $this->storage->copy($source, $destination);
+    }
+
     public function copyFile(string $source, string $destination)
     {
         $source = $this->applyPathPrefix($source);
@@ -232,6 +243,19 @@ class Filesystem implements Service
         );
     }
 
+    public function checkUpcont(string $target) : string
+    {
+        $real = $this->applyPathPrefix($target);
+
+        while ($this->storage->has($real)) {
+            $target = $this->upcountName($target);
+            $real = $this->applyPathPrefix($target);
+        }
+
+        return $target;
+    }
+
+
     private function applyPathPrefix(string $path): string
     {
         if (strpos($path, '..') !== false) {
@@ -290,5 +314,25 @@ class Filesystem implements Service
         $tmp = explode($this->separator, trim($path, $this->separator));
 
         return  (string) array_pop($tmp);
+    }
+
+    public function changeExt(string $path, string $extension): string
+    {
+        if (! strpos($path, '.')) {
+            return $path;
+        }
+
+        if (strpos($extension, '.')) {
+            $extension = trim($extension, '.');
+        }
+
+        return substr_replace($path , $extension, strrpos($path , '.') + 1);
+    }
+
+    public function getFileName(string $path): string
+    {
+        $basename = $this->getBaseName($path);
+
+        return pathinfo($basename, PATHINFO_FILENAME);
     }
 }

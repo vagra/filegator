@@ -38,10 +38,10 @@ class AdminController
     {
         $validator->setMessage('required', 'This field is required');
         $validation = $validator->validate($request->all(), [
-            'name' => 'required',
-            'username' => 'required',
+            'name' => 'required|between:2,16',
+            'username' => 'required|alpha_dash|between:4,16',
             'homedir' => 'required',
-            'password' => 'required',
+            'password' => 'required|between:6,16',
         ]);
 
         if ($validation->fails()) {
@@ -78,8 +78,8 @@ class AdminController
 
         $validator->setMessage('required', 'This field is required');
         $validation = $validator->validate($request->all(), [
-            'name' => 'required',
-            'username' => 'required',
+            'name' => 'required|between:2,16',
+            'username' => 'required|alpha_dash|between:4,16',
             'homedir' => 'required',
         ]);
 

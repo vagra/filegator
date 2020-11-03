@@ -96,7 +96,7 @@ class WPAuth implements Service, AuthInterface
         return null; // not used
     }
 
-    public function update($username, User $user, $password = ''): User
+    public function update($username, User $user, $password = '', $name = ''): User
     {
         if ($password && get_current_user_id()) {
             wp_set_password($password, get_current_user_id());

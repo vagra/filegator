@@ -29,6 +29,12 @@
         <a v-if="!is('guest')" class="navbar-item logout" @click="logout">
           {{ lang('Logout') }}
         </a>
+        <a class="navbar-item helpdoc" @click="help">
+          {{ lang('Help') }}
+        </a>
+        <a class="navbar-item changelog" @click="changelog">
+          {{ lang('Change Log') }}
+        </a>
       </div>
     </div>
   </nav>
@@ -79,6 +85,12 @@ export default {
         component: Profile,
       })
     },
+    help() {
+      window.open(this.getRootLink('README'), '_blank')
+    },
+    changelog() {
+      window.open(this.getRootLink('CHANGELOG'), '_blank')
+    },
   }
 }
 </script>
@@ -103,7 +115,7 @@ export default {
     padding: 0 0 0 12px;
   }
   .logo img {
-    max-height: 2.5rem;
+    max-height: 5rem;
   }
 }
 </style>

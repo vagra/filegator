@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Browser from './views/Browser.vue'
 import Users from './views/Users.vue'
 import Login from './views/Login.vue'
+import Register from './views/Register.vue'
 import store from './store'
 
 Vue.use(Router)
@@ -14,6 +15,16 @@ export default new Router({
       path: '/',
       name: 'browser',
       component: Browser,
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: Register,
+      beforeEnter: (to, from, next) => {
+        if (store.state.config.allow_register) {
+          next()
+        }
+      }
     },
     {
       path: '/login',

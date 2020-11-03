@@ -10,19 +10,84 @@
 
 namespace Filegator\Controllers;
 
+use Filegator\Config\Config;
 use Filegator\Kernel\Request;
 use Filegator\Kernel\Response;
 use Filegator\Services\Auth\AuthInterface;
+use Filegator\Services\Auth\User;
+use Filegator\Services\Storage\Filesystem;
 use Filegator\Services\Logger\LoggerInterface;
 use Rakit\Validation\Validator;
 
 class AuthController
 {
+    protected $config;
+
     protected $logger;
 
-    public function __construct(LoggerInterface $logger)
+    protected $auth;
+
+    protected $storage;
+
+    public function __construct(Config $config, LoggerInterface $logger, AuthInterface $auth, Filesystem $storage)
     {
+        $this->config = $config;
+
         $this->logger = $logger;
+
+        $this->auth = $auth;
+
+        $this->storage = $storage;
+    }
+
+    public function register(User $user, Request $request, Response $response, Validator $validator)
+    {
+        if (!$this->config->get('frontend_config.allow_register')) {
+            return $response->json('Does not allow user register', 422);
+        }
+
+        $validation = $validator->validate($request->all(), [
+            'username' => 'required|alpha_dash|between:4,16',
+            'password' => 'required|between:6,16',
+        ]);
+
+        if ($validation->fails()) {
+            $errors = $validation->errors();
+
+            return $response->json($errors->firstOfAll(), 422);
+        }
+
+        if ($this->auth->find($request->input('username'))) {
+            return $response->json(['username' => 'Username already taken'], 422);
+        }
+
+        $username = $request->input('username');
+        $password = $request->input('password');
+        $homedir = '/'.$username;
+        $role = 'user';
+        $permissions = [
+            'read','write','upload','download','batchdownload','zip','convert'
+        ];
+
+        try {
+            $user->setName($username);
+            $user->setUsername($username);
+            $user->setHomedir($homedir);
+            $user->setRole($role);
+            $user->setPermissions($permissions);
+            $ret = $this->auth->add($user, $password);
+
+            if (!$this->storage->fileExists($homedir)
+            || !$this->storage->isDir($homedir)) {
+                $this->storage->createDir('/', $homedir);
+            }
+        } catch (\Exception $e) {
+            return $response->json($e->getMessage(), 422);
+        }
+
+        $this->logger->log("{$username} registerd from IP ".$request->getClientIp());
+
+        return $response->json(true);
     }
 
     public function login(Request $request, Response $response, AuthInterface $auth)
@@ -57,8 +122,9 @@ class AuthController
     {
         $validator->setMessage('required', 'This field is required');
         $validation = $validator->validate($request->all(), [
+            'newname' => 'between:2,16',
             'oldpassword' => 'required',
-            'newpassword' => 'required',
+            'newpassword' => 'between:6,16',
         ]);
 
         if ($validation->fails()) {
@@ -71,6 +137,6 @@ class AuthController
             return $response->json(['oldpassword' => 'Wrong password'], 422);
         }
 
-        return $response->json($auth->update($auth->user()->getUsername(), $auth->user(), $request->input('newpassword')));
+        return $response->json($auth->update($auth->user()->getUsername(), $auth->user(), $request->input('newpassword'), $request->input('newname')));
     }
 }

@@ -22,7 +22,7 @@ interface AuthInterface
 
     public function store(User $user);
 
-    public function update($username, User $user, $password = ''): User;
+    public function update($username, User $user, $password = '', $name = ''): User;
 
     public function add(User $user, $password): User;
 

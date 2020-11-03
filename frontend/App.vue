@@ -1,6 +1,7 @@
 <template>
   <div v-if="$store.state.initialized" id="wrapper">
-    <Login v-if="is('guest') && ! can('write') && ! can('read') && ! can('upload')" />
+    <Login v-if="need('login') && is('guest') && ! can('write') && ! can('read') && ! can('upload')" />
+    <Register v-else-if="need('register') && is('guest') && ! can('write') && ! can('read') && ! can('upload')" />
     <div v-else id="inner">
       <router-view />
     </div>
@@ -9,10 +10,14 @@
 
 <script>
 import Login from './views/Login'
+import Register from './views/Register'
 
 export default {
   name: 'App',
-  components: { Login }
+  components: {
+    Login,
+    Register
+  }
 }
 </script>
 

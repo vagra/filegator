@@ -20,6 +20,19 @@ const api = {
         .catch(error => reject(error))
     })
   },
+  register(params) {
+    return new Promise((resolve, reject) => {
+      axios.post('register', {
+        username: params.username,
+        password: params.password,
+      })
+        .then(
+          res => {
+            resolve(res.data.data)
+          },
+          error => reject(error))
+    })
+  },
   login(params) {
     return new Promise((resolve, reject) => {
       axios.post('login', {
@@ -119,6 +132,16 @@ const api = {
         .catch(error => reject(error))
     })
   },
+  convertItem(params) {
+    return new Promise((resolve, reject) => {
+      axios.post('convertitem', {
+        item: params.item,
+        destination: params.destination,
+      })
+        .then(res => resolve(res.data.data))
+        .catch(error => reject(error))
+    })
+  },
   removeItems(params) {
     return new Promise((resolve, reject) => {
       axios.post('deleteitems', {
@@ -184,6 +207,7 @@ const api = {
   changePassword(params) {
     return new Promise((resolve, reject) => {
       axios.post('changepassword', {
+        newname: params.newname,
         oldpassword: params.oldpassword,
         newpassword: params.newpassword,
       })

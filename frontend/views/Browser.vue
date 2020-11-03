@@ -90,7 +90,7 @@
                  :row-class="(row) => 'file-row type-'+row.type"
                  :checked-rows.sync="checked"
                  :loading="isLoading"
-                 :checkable="can('batchDownload') || can('write') || can('zip')"
+                 :checkable="can('batchDownload') || can('write') || can('zip') || can('convert')"
                  @contextmenu="rightClick"
         >
           <template slot-scope="props">
@@ -108,7 +108,7 @@
               {{ props.row.time ? formatDate(props.row.time) : '' }}
             </b-table-column>
 
-            <b-table-column id="single-actions" width="51">
+            <b-table-column id="single-actions" :label="lang('Action')" width="80">
               <b-dropdown v-if="props.row.type != 'back'" :disabled="checked.length > 0" aria-role="list" position="is-bottom-left">
                 <button :ref="'ref-single-action-button-'+props.row.path" slot="trigger" class="button is-small">
                   <b-icon icon="ellipsis-h" size="is-small" />
@@ -142,6 +142,30 @@
                   <b-icon icon="clipboard" size="is-small" /> {{ lang('Copy link') }}
                 </b-dropdown-item>
               </b-dropdown>
+
+              <b-button v-if="can(['read']) && isMd(props.row)" :disabled="checked.length > 0" size="is-small" @click="view(props.row)">
+                <b-icon icon="eye" size="is-small" />
+              </b-button>
+              <b-button v-if="can(['read']) && isHtml(props.row)" :disabled="checked.length > 0" size="is-small" @click="view(props.row)">
+                <b-icon icon="eye" size="is-small" />
+              </b-button>
+              <b-button v-if="can(['read']) && isPdf(props.row)" :disabled="checked.length > 0" size="is-small" @click="view(props.row)">
+                <b-icon icon="eye" size="is-small" />
+              </b-button>
+            </b-table-column>
+
+            <b-table-column id="convert-actions" :label="lang('Convert')" width="108">
+              <b-button v-if="can(['write', 'convert']) && isOpml(props.row)" :disabled="checked.length > 0" icon-left="arrow-right" size="is-small" @click="convert($event, props.row)">
+                {{ lang('Convert to MD') }}
+              </b-button>
+              
+              <b-button v-if="can(['write', 'convert']) && isMd(props.row)" :disabled="checked.length > 0" icon-left="arrow-right" size="is-small" @click="convert($event, props.row)">
+                {{ lang('Convert to HTML') }}
+              </b-button>
+
+              <b-button v-if="can(['write', 'convert']) && isHtml(props.row)" :disabled="checked.length > 0" icon-left="arrow-right" size="is-small" @click="convert($event, props.row)">
+                {{ lang('Convert to PDF') }}
+              </b-button>
             </b-table-column>
           </template>
 
@@ -385,6 +409,46 @@ export default {
         component: modal,
       })
     },
+    isDocs(item) {
+      const exts = ['opml', 'md', 'html', 'htm']
+      return item.type == 'file' && exts.includes(item.name.split('.').pop())
+    },
+    isOpml(item) {
+      return item.type == 'file' && item.name.split('.').pop() == 'opml'
+    },
+    isMd(item) {
+      return item.type == 'file' && item.name.split('.').pop() == 'md'
+    },
+    isHtml(item) {
+      const exts = ['html', 'htm']
+      return item.type == 'file' && exts.includes(item.name.split('.').pop())
+    },
+    isPdf(item) {
+      return item.type == 'file' && item.name.split('.').pop() == 'pdf'
+    },
+    convert(event, item) {
+      this.isLoading = true
+      api.convertItem({
+        item: item.path,
+        destination: this.$store.state.cwd.location,
+      })
+        .then(() => {
+          this.isLoading = false
+          this.loadFiles()
+        })
+        .catch(error => {
+          this.isLoading = false
+          this.handleError(error)
+        })
+      this.checked = []
+    },
+    view(item) {
+      if (this.isMd(item)) {
+        window.open(this.getDocsifyLink(item.path), '_blank')
+      } else {
+        window.open(this.getRepoLink(item.path), '_blank')
+      }
+    },
     isArchive(item) {
       return item.type == 'file' && item.name.split('.').pop() == 'zip'
     },
@@ -588,6 +652,9 @@ export default {
 }
 .file-row.type-dir a.name {
   font-weight: bold
+}
+#convert-actions {
+  padding: 6px 12px;
 }
 #single-actions {
   padding: 6px 12px;

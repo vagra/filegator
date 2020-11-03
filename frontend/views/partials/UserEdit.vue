@@ -19,20 +19,20 @@
             </b-select>
           </b-field>
 
-          <b-field :label="lang('Username')" :type="formErrors.username ? 'is-danger' : ''" :message="formErrors.username">
-            <b-input v-model="formFields.username" @keydown.native="formErrors.username = ''" />
+          <b-field :label="lang('Username')">
+            <b-input v-model="formFields.username" required :validation-message="lang('Only use letters, numbers and underscores', 4, 16)" pattern="[0-9a-zA-Z_]*" minlength="4" maxlength="16" @keydown.native="formErrors.username = ''" />
           </b-field>
 
-          <b-field :label="lang('Name')" :type="formErrors.name ? 'is-danger' : ''" :message="formErrors.name">
-            <b-input v-model="formFields.name" @keydown.native="formErrors.name = ''" />
+          <b-field :label="lang('Name')">
+            <b-input v-model="formFields.name" required minlength="2" maxlength="16" @keydown.native="formErrors.name = ''" />
           </b-field>
 
-          <b-field :label="lang('Password')" :type="formErrors.password ? 'is-danger' : ''" :message="formErrors.password">
-            <b-input v-model="formFields.password" :placeholder="action == 'edit' ? lang('Leave blank for no change') : ''" password-reveal @keydown.native="formErrors.password = ''" />
+          <b-field :label="lang('Password')">
+            <b-input v-model="formFields.password" type="password" :placeholder="action == 'edit' ? lang('Leave blank for no change') : ''" minlength="6" maxlength="16" password-reveal @keydown.native="formErrors.password = ''" />
           </b-field>
         </div>
 
-        <b-field :label="lang('Homedir')" :type="formErrors.homedir ? 'is-danger' : ''" :message="formErrors.homedir">
+        <b-field :label="lang('Homedir')">
           <b-input v-model="formFields.homedir" @focus="selectDir" />
         </b-field>
 
@@ -55,6 +55,9 @@
             </b-checkbox>
             <b-checkbox v-model="permissions.zip">
               {{ lang('Zip') }}
+            </b-checkbox>
+            <b-checkbox v-model="permissions.convert">
+              {{ lang('Convert') }}
             </b-checkbox>
           </div>
         </b-field>
@@ -96,6 +99,7 @@ export default {
         download: _.find(this.user.permissions, p => p == 'download') ? true : false,
         batchdownload: _.find(this.user.permissions, p => p == 'batchdownload') ? true : false,
         zip: _.find(this.user.permissions, p => p == 'zip') ? true : false,
+        convert: _.find(this.user.permissions, p => p == 'convert') ? true : false,
       }
     }
   },
@@ -107,6 +111,7 @@ export default {
         this.permissions.write = false
         this.permissions.batchdownload = false
         this.permissions.zip = false
+        this.permissions.convert = false
       }
     },
     'permissions.write' (val) {
@@ -114,6 +119,7 @@ export default {
         this.permissions.read = true
       } else {
         this.permissions.zip = false
+        this.permissions.convert = false
       }
     },
     'permissions.download' (val) {
@@ -128,6 +134,12 @@ export default {
       }
     },
     'permissions.zip' (val) {
+      if (val) {
+        this.permissions.read = true
+        this.permissions.write = true
+      }
+    },
+    'permissions.convert' (val) {
       if (val) {
         this.permissions.read = true
         this.permissions.write = true

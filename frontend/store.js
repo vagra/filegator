@@ -8,6 +8,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     initialized: false,
+    action: 'login',
     config: [],
     user: {
       role: 'guest',
@@ -48,6 +49,9 @@ export default new Vuex.Store({
         name: shared.methods.lang('Home'),
         children: [],
       }
+    },
+    setAction(state, data) {
+      state.action = data
     },
     setConfig(state, data) {
       state.config = data

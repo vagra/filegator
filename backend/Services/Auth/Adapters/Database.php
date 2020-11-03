@@ -77,7 +77,7 @@ class Database implements Service, AuthInterface
         return $this->session->set(self::SESSION_KEY, $user);
     }
 
-    public function update($username, User $user, $password = ''): User
+    public function update($username, User $user, $password = '', $name = ''): User
     {
         if (! $this->find($username)) {
             throw new \Exception('User not found');
@@ -98,6 +98,12 @@ class Database implements Service, AuthInterface
         if ($password) {
             $this->getConnection()->query('UPDATE users SET', [
                 'password' => $this->hashPassword($password),
+            ], 'WHERE username = ?', $username);
+        }
+
+        if ($name) {
+            $this->getConnection()->query('UPDATE users SET', [
+                'name' => $name,
             ], 'WHERE username = ?', $username);
         }
 

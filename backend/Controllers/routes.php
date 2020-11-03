@@ -13,6 +13,16 @@ return [
     ],
     [
         'route' => [
+            'POST', '/register', '\Filegator\Controllers\AuthController@register',
+        ],
+        'roles' => [
+            'guest',
+        ],
+        'permissions' => [
+        ],
+    ],
+    [
+        'route' => [
             'POST', '/login', '\Filegator\Controllers\AuthController@login',
         ],
         'roles' => [
@@ -136,6 +146,17 @@ return [
         ],
         'permissions' => [
             'read', 'write', 'zip',
+        ],
+    ],
+    [
+        'route' => [
+            'POST', '/convertitem', '\Filegator\Controllers\FileController@convertItem',
+        ],
+        'roles' => [
+            'guest', 'user', 'admin',
+        ],
+        'permissions' => [
+            'read', 'write', 'convert',
         ],
     ],
     [

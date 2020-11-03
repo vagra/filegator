@@ -15,6 +15,9 @@ use Filegator\Kernel\Request;
 use Filegator\Kernel\Response;
 use Filegator\Services\Archiver\ArchiverInterface;
 use Filegator\Services\Auth\AuthInterface;
+use Filegator\Services\Converter\Adapters\OpmlConverter;
+use Filegator\Services\Converter\Adapters\MdConverter;
+use Filegator\Services\Converter\Adapters\HtmlConverter;
 use Filegator\Services\Session\SessionStorageInterface as Session;
 use Filegator\Services\Storage\Filesystem;
 
@@ -140,6 +143,37 @@ class FileController
         $destination = $request->input('destination', $this->separator);
 
         $archiver->uncompress($source, $destination, $this->storage);
+
+        return $response->json('Done');
+    }
+
+    public function convertItem(Request $request, Response $response)
+    {
+        $source = $request->input('item');
+        $destination = $request->input('destination', $this->separator);
+
+        $ext = pathinfo($source, PATHINFO_EXTENSION);
+
+        switch ($ext) {
+            case 'opml':
+                $converter = new OpmlConverter($this->config, $this->storage);
+                break;
+            case 'md':
+                $converter = new MdConverter($this->config, $this->storage);
+                break;
+            case 'html':
+            case 'htm':
+                $converter = new HtmlConverter($this->config, $this->storage);
+                break;
+            default:
+                return $response->json('Cant convert files with this format', 422);
+        }
+        
+        $result = $converter->convert($source, $destination);
+
+        if (!$result) {
+            return $response->json('File format cant be recognized', 422);
+        }
 
         return $response->json('Done');
     }

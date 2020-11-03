@@ -74,7 +74,7 @@ class JsonFile implements Service, AuthInterface
         return $this->session->set(self::SESSION_KEY, $user);
     }
 
-    public function update($username, User $user, $password = ''): User
+    public function update($username, User $user, $password = '', $name = ''): User
     {
         $all_users = $this->getUsers();
 
@@ -92,6 +92,10 @@ class JsonFile implements Service, AuthInterface
 
                 if ($password) {
                     $u['password'] = $this->hashPassword($password);
+                }
+
+                if ($name) {
+                    $u['name'] = $name;
                 }
 
                 $this->saveUsers($all_users);
